@@ -1,4 +1,3 @@
-// components/Navbar.jsx
 export default function Navbar() {
   return (
     <nav className="w-full bg-white border-b shadow-sm">

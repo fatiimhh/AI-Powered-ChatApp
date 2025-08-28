@@ -1,4 +1,3 @@
-// pages/Home.jsx
 import { useState, useRef, useEffect } from "react";
 import MessageBubble from "../components/MessageBubble";
 
