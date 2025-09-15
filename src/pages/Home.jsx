@@ -6,17 +6,47 @@ export default function Home() {
     { role: "assistant", content: "👋 Hey! I'm Rome, your workflow co-pilot." },
   ]);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false); // typing state
   const messagesEndRef = useRef(null);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
-    setMessages([...messages, { role: "user", content: input }]);
+
+    // Add user message
+    const newMessages = [...messages, { role: "user", content: input }];
+    setMessages(newMessages);
     setInput("");
+    setIsTyping(true); // show typing indicator
+
+    try {
+      const res = await fetch("http://localhost:5000/api/groq", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      const data = await res.json();
+
+      // Extract Groq reply with safe fallbacks
+      const reply =
+        data.choices?.[0]?.message?.content ||
+        data.choices?.[0]?.text ||
+        JSON.stringify(data) ||
+        "No response from Groq";
+
+      setMessages([...newMessages, { role: "assistant", content: reply }]);
+    } catch (err) {
+      console.error("Error calling backend:", err);
+      setMessages([...newMessages, { role: "assistant", content: "Error calling API ❌" }]);
+    } finally {
+      setIsTyping(false); // hide typing indicator
+    }
   };
 
+  // Auto scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
 
   return (
     <div className="w-full max-w-2xl flex flex-col bg-white rounded-3xl shadow-xl border overflow-hidden">
@@ -26,10 +56,19 @@ export default function Home() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 p-6 overflow-y-auto flex flex-col gap-4 bg-gray-50" style={{ minHeight: "450px" }}>
+      <div
+        className="flex-1 p-6 overflow-y-auto flex flex-col gap-4 bg-gray-50"
+        style={{ minHeight: "450px" }}
+      >
         {messages.map((msg, i) => (
           <MessageBubble key={i} role={msg.role} content={msg.content} />
         ))}
+
+        {/* Typing indicator */}
+        {isTyping && (
+          <div className="text-gray-500 italic">Rome is typing...</div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
