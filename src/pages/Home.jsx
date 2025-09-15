@@ -3,7 +3,7 @@ import MessageBubble from "../components/MessageBubble";
 
 export default function Home() {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "👋 Hey! I'm Rome, your workflow co-pilot." },
+    { role: "assistant", content: "Hey! I'm Rome, your workflow co-pilot." },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false); // typing state
