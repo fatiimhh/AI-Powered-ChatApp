@@ -24,17 +24,20 @@ export default function Home() {
     if (!window.speechSynthesis) return;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
-    utterance.rate = 1; // normal speed
+    utterance.rate = 1;
     speechSynthesis.speak(utterance);
   };
 
-  const sendMessage = async (userInput = input) => {
+  const sendMessage = async (userInput = input, fromVoice = false) => {
     if (!userInput.trim()) return;
 
-    const newMessages = [...messages, { role: "user", content: userInput }];
+    const newMessages = [
+      ...messages,
+      { role: "user", content: userInput, voice: fromVoice },
+    ];
     setMessages(newMessages);
     setInput("");
-    resetTranscript(); // clear voice transcript if used
+    resetTranscript();
     setIsTyping(true);
 
     try {
@@ -52,8 +55,6 @@ export default function Home() {
         "No response from Groq";
 
       setMessages([...newMessages, { role: "assistant", content: reply }]);
-
-      // Read reply out loud
       speak(reply);
     } catch (err) {
       console.error("Error calling backend:", err);
@@ -66,14 +67,14 @@ export default function Home() {
     }
   };
 
-  // Send voice input automatically when finished speaking
+  // Automatically send voice input when user stops speaking
   useEffect(() => {
     if (transcript && !listening) {
-      sendMessage(transcript);
+      sendMessage(transcript, true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcript, listening]);
 
+  // Auto scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
@@ -99,12 +100,15 @@ export default function Home() {
         style={{ minHeight: "450px" }}
       >
         {messages.map((msg, i) => (
-          <MessageBubble key={i} role={msg.role} content={msg.content} />
+          <MessageBubble
+            key={i}
+            role={msg.role}
+            content={msg.content}
+            voice={msg.voice}
+          />
         ))}
 
-        {isTyping && (
-          <div className="text-gray-500 italic">Rome is typing...</div>
-        )}
+        {isTyping && <div className="text-gray-500 italic">Rome is typing...</div>}
 
         <div ref={messagesEndRef} />
       </div>

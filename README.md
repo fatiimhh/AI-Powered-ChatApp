@@ -1,12 +1,28 @@
-# React + Vite
+# Rome AI Co-Pilot
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Rome is an AI-powered workflow assistant designed to integrate directly into your browser or web apps. It allows users to chat via **text** or **voice**, and provides real-time AI-powered suggestions or responses.  
 
-Currently, two official plugins are available:
+The project is built with **React**, **Tailwind CSS**, **Node.js/Express**, **Groq API**, and includes optional deployment as a **Chrome extension**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Real-time chat interface with AI assistant
+- Supports **text input** and **voice input**
+- Voice output for assistant responses using the browser’s text-to-speech
+- Polished UI inspired by AI Validator and Interview Simulator projects
+- Can be deployed as a **web app**, **Chrome extension**, or **Slack bot** (planned)
+
+---
+
+## Tech Stack
+
+- **Frontend**: React + Tailwind CSS  
+- **Backend/API**: Node.js + Express + Firebase   
+- **AI Engine**: Groq API 
+- **Integration**: Chrome extension (vanilla JS + API)  
+- **Hosting**: Vercel  
+
+---
+
