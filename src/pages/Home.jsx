@@ -4,7 +4,7 @@ import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
 export default function Home() {
   const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem("chatMessages");
+    const saved = localStorage.getItem("chatMessages"); // load from localstorage
     return saved
       ? JSON.parse(saved)
       : [{ role: "assistant", content: "Hey! I'm Rome, your workflow co-pilot." }];
