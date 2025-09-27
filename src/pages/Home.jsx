@@ -28,44 +28,47 @@ export default function Home() {
     speechSynthesis.speak(utterance);
   };
 
-  const sendMessage = async (userInput = input, fromVoice = false) => {
-    if (!userInput.trim()) return;
 
-    const newMessages = [
-      ...messages,
-      { role: "user", content: userInput, voice: fromVoice },
-    ];
-    setMessages(newMessages);
-    setInput("");
-    resetTranscript();
-    setIsTyping(true);
 
-    try {
-      const res = await fetch("http://localhost:5000/api/groq", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
-      });
+  
+const sendMessage = async (userInput = input, fromVoice = false) => {
+  if (!userInput.trim()) return;
 
-      const data = await res.json();
+  const newMessages = [
+    ...messages,
+    { role: "user", content: userInput, voice: fromVoice },
+  ];
+  setMessages(newMessages);
+  setInput("");
+  resetTranscript();
+  setIsTyping(true);
 
-      const reply =
-        data.choices?.[0]?.message?.content ||
-        data.choices?.[0]?.text ||
-        "No response from Groq";
+  try {
+    const res = await fetch("http://localhost:5000/api/groq", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: newMessages }),
+    });
 
-      setMessages([...newMessages, { role: "assistant", content: reply }]);
-      speak(reply);
-    } catch (err) {
-      console.error("Error calling backend:", err);
-      setMessages([
-        ...newMessages,
-        { role: "assistant", content: "Error calling API ❌" },
-      ]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
+    const data = await res.json();
+    console.log("Backend response:", data);
+
+    // 
+    const reply = data?.choices?.[0]?.message?.content || "No reply from model";
+
+    setMessages([...newMessages, { role: "assistant", content: reply }]);
+    speak(reply);
+  } catch (err) {
+    console.error("Error calling backend:", err);
+    setMessages([
+      ...newMessages,
+      { role: "assistant", content: "❌ Error calling API" },
+    ]);
+  } finally {
+    setIsTyping(false);
+  }
+};
+
 
   // Automatically send voice input when user stops speaking
   useEffect(() => {

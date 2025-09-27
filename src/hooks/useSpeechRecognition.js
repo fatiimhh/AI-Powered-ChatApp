@@ -4,7 +4,6 @@ export default function useSpeechRecognition() {
   const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState("");
 
-  // initialize SpeechRecognition and set up event handlers 
   useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -13,10 +12,9 @@ export default function useSpeechRecognition() {
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = "en-US"; // will add more language support later
+    recognition.lang = "en-US";
 
-    // update transcript state when speech is recognized
-    recognition.onresult = (event) => { 
+    recognition.onresult = (event) => {
       setTranscript(event.results[0][0].transcript);
     };
 
@@ -27,9 +25,15 @@ export default function useSpeechRecognition() {
     return () => recognition.stop();
   }, [listening]);
 
+  const startListening = () => setListening(true);
+  const stopListening = () => setListening(false);
+  const resetTranscript = () => setTranscript("");
+
   return {
     transcript,
     listening,
-    startListening: () => setListening(true), // function to start listening
+    startListening,
+    stopListening,
+    resetTranscript,
   };
 }
