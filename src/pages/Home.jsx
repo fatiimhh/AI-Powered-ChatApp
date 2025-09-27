@@ -3,9 +3,13 @@ import MessageBubble from "../components/MessageBubble";
 import useSpeechRecognition from "../hooks/useSpeechRecognition"; 
 
 export default function Home() {
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hey! I'm Rome, your workflow co-pilot." },
-  ]);
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("chatMessages");
+    return saved
+      ? JSON.parse(saved)
+      : [{ role: "assistant", content: "Hey! I'm Rome, your workflow co-pilot." }];
+  });
+
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
@@ -30,45 +34,50 @@ export default function Home() {
 
 
 
-  
-const sendMessage = async (userInput = input, fromVoice = false) => {
-  if (!userInput.trim()) return;
+  // send message to backend
+  const sendMessage = async (userInput = input, fromVoice = false) => {
+    if (!userInput.trim()) return;
 
-  const newMessages = [
-    ...messages,
-    { role: "user", content: userInput, voice: fromVoice },
-  ];
-  setMessages(newMessages);
-  setInput("");
-  resetTranscript();
-  setIsTyping(true);
+    const newMessages = [
+      ...messages,
+      { role: "user", content: userInput, voice: fromVoice },
+    ];
+    setMessages(newMessages);
+    localStorage.setItem("chatMessages", JSON.stringify(newMessages));
+    setInput("");
+    resetTranscript?.();
+    setIsTyping(true);
 
-  try {
-    const res = await fetch("http://localhost:5000/api/groq", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: newMessages }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/groq", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
 
-    const data = await res.json();
-    console.log("Backend response:", data);
+      const data = await res.json();
 
-    // 
-    const reply = data?.choices?.[0]?.message?.content || "No reply from model";
+      const reply =
+        data.choices?.[0]?.message?.content ||
+        data.choices?.[0]?.text ||
+        "No response from Groq";
 
-    setMessages([...newMessages, { role: "assistant", content: reply }]);
-    speak(reply);
-  } catch (err) {
-    console.error("Error calling backend:", err);
-    setMessages([
-      ...newMessages,
-      { role: "assistant", content: "❌ Error calling API" },
-    ]);
-  } finally {
-    setIsTyping(false);
-  }
-};
-
+      const updated = [...newMessages, { role: "assistant", content: reply }]; 
+      setMessages(updated);
+      localStorage.setItem("chatMessages", JSON.stringify(updated));
+      speak(reply);
+    } catch (err) {
+      console.error("Error calling backend:", err);
+      const updated = [
+        ...newMessages,
+        { role: "assistant", content: "Error calling API" },
+      ];
+      setMessages(updated);
+      localStorage.setItem("chatMessages", JSON.stringify(updated));
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   // Automatically send voice input when user stops speaking
   useEffect(() => {
@@ -82,19 +91,38 @@ const sendMessage = async (userInput = input, fromVoice = false) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
+  // Clear chat history with confirmation
+  const clearChat = () => {
+    if (window.confirm("Are you sure you want to clear the chat?")) {
+      const initialMsg = [
+        { role: "assistant", content: "Hey! I'm Rome, your workflow co-pilot." },
+      ];
+      setMessages(initialMsg);
+      localStorage.setItem("chatMessages", JSON.stringify(initialMsg));
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl flex flex-col bg-white rounded-3xl shadow-xl border overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold text-lg flex justify-between items-center">
         Rome AI Co-Pilot
-        <button
-          onClick={listening ? stopListening : startListening}
-          className={`ml-4 px-3 py-1 rounded-full text-sm ${
-            listening ? "bg-red-500 text-white" : "bg-white text-indigo-600"
-          }`}
-        >
-          {listening ? "Stop" : "Speak"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={listening ? stopListening : startListening}
+            className={`px-3 py-1 rounded-full text-sm ${
+              listening ? "bg-red-500 text-white" : "bg-white text-indigo-600"
+            }`}
+          >
+            {listening ? "Stop" : "Speak"}
+          </button>
+          <button
+            onClick={clearChat}
+            className="px-3 py-1 rounded-full text-sm bg-white text-indigo-600 hover:bg-indigo-100"
+          >
+            Clear Chat
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
