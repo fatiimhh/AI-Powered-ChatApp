@@ -41,7 +41,7 @@ The project is built with **React**, **Tailwind CSS**, **Firebase Authentication
 
 ---
 
-🌐 Deployment
+## 🌐 Deployment
 
 Web App: Deploy easily on Vercel: https://ai-powered-chat-app-delta.vercel.app/
 
@@ -52,3 +52,9 @@ Build the project
 Copy the extension files into /dist
 
 Load into Chrome via chrome://extensions (Developer Mode → Load unpacked)
+
+---
+
+## 📄 License
+
+MIT License © 2025 Rome AI Co-Pilot
